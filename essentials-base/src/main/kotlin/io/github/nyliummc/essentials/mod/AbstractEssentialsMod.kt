@@ -32,7 +32,9 @@ import io.github.nyliummc.essentials.entities.EssentialsDatabase
 import io.github.nyliummc.essentials.entities.EssentialsRegistry
 import io.github.nyliummc.essentials.entities.LanguageHack
 import io.github.nyliummc.essentials.injection.AbstractModule
+import io.github.nyliummc.essentials.internal.TickScheduler
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.loader.api.FabricLoader
 import org.apache.logging.log4j.LogManager
 
@@ -89,6 +91,10 @@ abstract class AbstractEssentialsMod : EssentialsMod {
         ServerLifecycleEvents.SERVER_STOPPED.register(ServerLifecycleEvents.ServerStopped { server ->
             // Disable DB, unregister everything except commands
             database.disconnect()
+        })
+
+        ServerTickEvents.END_SERVER_TICK.register(ServerTickEvents.EndTick { server ->
+            TickScheduler.tick(server)
         })
     }
 

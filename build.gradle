@@ -223,8 +223,6 @@ for (Project it : subprojects) {
     }
 }
 build.dependsOn(last)
-curseforge.dependsOn(last)
-
 
 dependencies {
     afterEvaluate {
@@ -270,34 +268,43 @@ remapSourcesJar {
 
 // Curseforge upload
 
-curseforge {
+if (project.file("curseforge.gradle").exists()) {
     apply from: 'curseforge.gradle'
-    apiKey = project.apiKey
-    project {
-        id = "350123"
-        releaseType = "release"
-        changelogType = "markdown"
-        changelog = "Fix various issues posted on CF and Github"
-        addGameVersion project.minecraft
-        addGameVersion "Fabric"
-        addGameVersion "Java 8"
 
-        subprojects { sub ->
-            // Add built modules
-            if (sub.name.contains("-base")) {
-                mainArtifact file("${project.buildDir}/libs/$sub.archivesBaseName-${project.version}.jar")
-            } else if (sub.name.contains("-api")) {
-                addArtifact file("${project.buildDir}/libs/$sub.archivesBaseName-${project.version}-dev.jar")
-            } else {
-                addArtifact file("${project.buildDir}/libs/$sub.archivesBaseName-${project.version}.jar")
+    this.apply {
+        curseforge.dependsOn(last)
+
+        curseforge {
+            apiKey = project.apiKey
+            project {
+                id = "350123"
+                releaseType = "release"
+                changelogType = "markdown"
+                changelog = "Fix various issues posted on CF and Github"
+                addGameVersion project.minecraft
+                addGameVersion "Fabric"
+                addGameVersion "Java 8"
+
+                subprojects { sub ->
+                    // Add built modules
+                    if (sub.name.contains("-base")) {
+                        mainArtifact file("${project.buildDir}/libs/$sub.archivesBaseName-${project.version}.jar")
+                    } else if (sub.name.contains("-api")) {
+                        addArtifact file("${project.buildDir}/libs/$sub.archivesBaseName-${project.version}-dev.jar")
+                    } else {
+                        addArtifact file("${project.buildDir}/libs/$sub.archivesBaseName-${project.version}.jar")
+                    }
+                }
+
+                afterEvaluate {
+                    uploadTask.dependsOn(remapJar)
+                }
+            }
+            options {
+                forgeGradleIntegration = false
             }
         }
-
-        afterEvaluate {
-            uploadTask.dependsOn(remapJar)
-        }
     }
-    options {
-        forgeGradleIntegration = false
-    }
+} else {
+    println("Publishing is not availible without a valid \"curseforge.gradle\"")
 }
