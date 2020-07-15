@@ -26,7 +26,9 @@ package io.github.nyliummc.essentials.entities
 
 import com.mojang.authlib.GameProfile
 import io.github.nyliummc.essentials.EssentialsDynmapModule
+import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.SignBlock
+import net.minecraft.network.MessageType
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
@@ -60,6 +62,10 @@ class FabricDynmapServer(private val server: MinecraftServer) : DynmapServerInte
     private val fabricPlayerMap: WeakHashMap<ServerPlayerEntity, FabricDynmapOnlinePlayer> = WeakHashMap<ServerPlayerEntity, FabricDynmapOnlinePlayer>()
     private val registered = mutableSetOf<DynmapListenerManager.EventType>()
 
+    private val utilitiesAvailable by lazy {
+        FabricLoader.getInstance().isModLoaded("essentials-module-utilities")
+    }
+
     fun getWorld(world: ServerWorld): FabricDynmapWorld {
         return fabricWorldMap.computeIfAbsent(world) { FabricDynmapWorld(world) }
     }
@@ -87,10 +93,8 @@ class FabricDynmapServer(private val server: MinecraftServer) : DynmapServerInte
 
     fun tick() {
         val list: List<Runnable>? = tickTaskMap.remove(server.ticks.toLong())
-        if (list != null) {
-            for (r in list) {
-                r.run()
-            }
+        list?.forEach { r ->
+            r.run()
         }
     }
 
@@ -152,6 +156,11 @@ class FabricDynmapServer(private val server: MinecraftServer) : DynmapServerInte
                 // Implemented in mixins
             }
 
+            DynmapListenerManager.EventType.BLOCK_BREAK -> {
+                // TODO
+                return false
+            }
+
             DynmapListenerManager.EventType.WORLD_SPAWN_CHANGE -> {
                 // TODO
                 return false
@@ -175,12 +184,12 @@ class FabricDynmapServer(private val server: MinecraftServer) : DynmapServerInte
     }
 
     override fun sendWebChatEvent(source: String, name: String, msg: String): Boolean {
-        server.sendSystemMessage(LiteralText("[$source/$name] $msg"), Util.NIL_UUID)
+        server.playerManager.broadcastChatMessage(LiteralText("[$source/$name] $msg"), MessageType.SYSTEM, Util.NIL_UUID)
         return DynmapCommonAPIListener.fireWebChatEvent(source, name, msg)
     }
 
     override fun broadcastMessage(msg: String?) {
-        server.sendSystemMessage(LiteralText("[Dynmap] $msg"), Util.NIL_UUID);
+        server.playerManager.broadcastChatMessage(LiteralText("[Dynmap] $msg"), MessageType.SYSTEM, Util.NIL_UUID)
     }
 
     override fun getBiomeIDs(): Array<String?>? {
@@ -198,7 +207,23 @@ class FabricDynmapServer(private val server: MinecraftServer) : DynmapServerInte
     }
 
     override fun getWorldByName(wname: String): DynmapWorld? {
-        return getWorld(server.getWorld(RegistryKey.of(Registry.DIMENSION, Identifier(wname)))!!);
+        val key = when (wname) {
+            "normal" -> {
+                World.OVERWORLD
+            }
+            "the_nether" -> {
+                World.NETHER
+            }
+            "the_end" -> {
+                World.END
+            }
+            else -> {
+                println("Unknown world: $wname")
+                RegistryKey.of(Registry.DIMENSION, Identifier(wname))
+            }
+        }
+
+        return getWorld(server.getWorld(key)!!);
     }
 
     override fun checkPlayerPermissions(player: String, perms: Set<String>?): Set<String?> {
@@ -236,7 +261,20 @@ class FabricDynmapServer(private val server: MinecraftServer) : DynmapServerInte
     }
 
     override fun getServerTPS(): Double {
-        // Get from module-utilities if available
+        // TODO: Get from module-utilities if available
+        /*
+        if (utilitiesAvailable) {
+            val trackers = EssentialsUtilitiesModule.tpsTrackers
+
+            var total = 0.0
+            trackers.forEach { (id, tracker) ->
+                val tps = tracker.getTps()
+                total += tps
+            }
+            return total / trackers.size
+        }
+        */
+
         return 1.0 / server.tickTime
     }
 

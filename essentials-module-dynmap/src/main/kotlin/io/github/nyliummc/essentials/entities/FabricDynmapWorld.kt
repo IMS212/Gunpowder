@@ -26,8 +26,10 @@ package io.github.nyliummc.essentials.entities
 
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.registry.RegistryKey
 import net.minecraft.world.Heightmap
 import net.minecraft.world.LightType
+import net.minecraft.world.World
 import net.minecraft.world.dimension.DimensionType
 import org.dynmap.DynmapChunk
 import org.dynmap.DynmapLocation
@@ -36,9 +38,9 @@ import org.dynmap.utils.MapChunkCache
 import org.dynmap.utils.Polygon
 
 
-class FabricDynmapWorld(var world: ServerWorld) : DynmapWorld(getName(world.dimension), world.height, world.seaLevel) {
+class FabricDynmapWorld(var world: ServerWorld) : DynmapWorld(getName(world.registryKey), world.height, world.seaLevel) {
     override fun isNether(): Boolean {
-        return world.registryKey.value.path == "the_nether"
+        return world.registryKey == World.NETHER
     }
 
     override fun getSpawnLocation(): DynmapLocation {
@@ -115,8 +117,13 @@ class FabricDynmapWorld(var world: ServerWorld) : DynmapWorld(getName(world.dime
     }
 
     companion object {
-        private fun getName(type: DimensionType): String {
-            return "world" + type.suffix
+        fun getName(type: RegistryKey<World>): String {
+            return when (type) {
+                World.OVERWORLD -> "world"
+                World.NETHER -> "world_nether"
+                World.END -> "world_end"
+                else -> type.value.toString()
+            }
         }
     }
 }

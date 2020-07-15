@@ -185,7 +185,9 @@ class FabricDynmapMapChunkCache(private val fworld: FabricDynmapWorld,
 
         override fun getBlockTypeAt(s: BlockStep): DynmapBlockState? {
             val poso = pos!!.add(s.xoff, s.yoff, s.zoff)
-            return FabricDynmapBlockStateMapper.INSTANCE[world.getBlockState(poso)]
+            val state = FabricDynmapBlockStateMapper.INSTANCE[world.getBlockState(poso)]
+            println("getBlockTypeAt($s): $state")
+            return state
         }
 
         override fun getLastStep(): BlockStep {

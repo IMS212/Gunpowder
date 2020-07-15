@@ -59,10 +59,11 @@ object BalanceHandler : APIBalanceHandler {
 
     override fun getUser(user: UUID): StoredBalance {
         return cache[user] ?: transaction {
-            val userObj = BalanceTable.insert {
+            BalanceTable.insert {
                 it[BalanceTable.user] = user
                 it[BalanceTable.balance] = startBalance
             }
+
             val balance = StoredBalance(
                     user,
                     startBalance)

@@ -24,12 +24,14 @@
 
 package io.github.nyliummc.essentials.entities
 
+import com.mojang.authlib.minecraft.MinecraftProfileTexture
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.LiteralText
 import org.dynmap.DynmapLocation
 import org.dynmap.common.DynmapPlayer
 import java.net.InetSocketAddress
 import java.net.SocketAddress
+import java.time.Instant
 import java.util.*
 
 
@@ -53,7 +55,7 @@ class FabricDynmapOnlinePlayer(private val player: ServerPlayerEntity) : DynmapP
     }
 
     override fun getWorld(): String {
-        return player.world.dimensionRegistryKey.value.path
+        return FabricDynmapWorld.getName(player.world.registryKey)
     }
 
     override fun getAddress(): InetSocketAddress? {
@@ -75,17 +77,15 @@ class FabricDynmapOnlinePlayer(private val player: ServerPlayerEntity) : DynmapP
 
     override fun getBedSpawnLocation(): DynmapLocation {
         val pos = player.spawnPointPosition ?: player.server.overworld.spawnPos
-        return DynmapLocation(player.spawnPointDimension.value.path, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())
+        return DynmapLocation(FabricDynmapWorld.getName(player.spawnPointDimension), pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())
     }
 
     override fun getLastLoginTime(): Long {
-        // TODO("Not yet implemented")
-        return 0
+        return Instant.now().epochSecond
     }
 
     override fun getFirstLoginTime(): Long {
-        // TODO("Not yet implemented")
-        return 0
+        return Instant.now().epochSecond  // TODO
     }
 
     override fun isInvisible(): Boolean {
@@ -93,7 +93,6 @@ class FabricDynmapOnlinePlayer(private val player: ServerPlayerEntity) : DynmapP
     }
 
     override fun getSortWeight(): Int {
-        // TODO("Not yet implemented")
         return weight
     }
 
@@ -124,8 +123,7 @@ class FabricDynmapOnlinePlayer(private val player: ServerPlayerEntity) : DynmapP
     }
 
     override fun getSkinURL(): String? {
-        // TODO("Not yet implemented")
-        return null
+        return player.server.sessionService.getTextures(player.gameProfile, false)[MinecraftProfileTexture.Type.SKIN]?.url
     }
 
     override fun getUUID(): UUID? {

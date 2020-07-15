@@ -33,7 +33,7 @@ import java.util.*
 
 
 class FabricDynmapBlockStateMapper {
-    private val dynmapBlockStateMap: MutableMap<BlockState, DynmapBlockState> = HashMap<BlockState, DynmapBlockState>()
+    private val dynmapBlockStateMap: MutableMap<BlockState, DynmapBlockState> = HashMap()
 
     operator fun get(state: BlockState): DynmapBlockState? {
         return dynmapBlockStateMap[state]
@@ -49,19 +49,26 @@ class FabricDynmapBlockStateMapper {
             var defaultState: DynmapBlockState? = null
             for (stateIdx in states.indices) {
                 val state = states[stateIdx]
+
                 val dynmapState = DynmapBlockState(
                         defaultState, stateIdx,
                         blockName, BlockStateUtil.propertiesToString(state),
                         state.material.toString()
                 )
+
                 dynmapBlockStateMap[state] = dynmapState
+
                 if (defaultState == null) {
                     defaultState = dynmapState
                 }
+
                 if (state.isAir) dynmapState.setAir() else {
                     if (state.material.isSolid) dynmapState.setSolid()
-                    if (state.material == Material.WOOD) dynmapState.setLog() else if (state.material == Material.LEAVES) dynmapState.setLeaves()
+
+                    if (state.material == Material.WOOD) dynmapState.setLog()
+                    else if (state.material == Material.LEAVES) dynmapState.setLeaves()
                 }
+
                 if (state.properties.contains(Properties.WATERLOGGED) && state[Properties.WATERLOGGED]) {
                     dynmapState.setWaterlogged()
                 }
