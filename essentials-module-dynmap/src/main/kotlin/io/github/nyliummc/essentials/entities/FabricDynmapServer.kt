@@ -47,6 +47,7 @@ import org.dynmap.common.DynmapListenerManager
 import org.dynmap.common.DynmapPlayer
 import org.dynmap.common.DynmapServerInterface
 import org.dynmap.utils.MapChunkCache
+import java.io.File
 import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
@@ -237,9 +238,9 @@ class FabricDynmapServer(private val server: MinecraftServer) : DynmapServerInte
     }
 
     override fun createMapChunkCache(w: DynmapWorld, chunks: List<DynmapChunk>, blockdata: Boolean, highesty: Boolean, biome: Boolean, rawbiome: Boolean): MapChunkCache? {
-        val cache = FabricDynmapMapChunkCache(w as FabricDynmapWorld, w.world, chunks)
-        cache.setChunkDataTypes(blockdata, biome, highesty, rawbiome)
-        return cache
+        return FabricDynmapMapChunkCache(w as FabricDynmapWorld, w.world, chunks).apply {
+            setChunkDataTypes(blockdata, biome, highesty, rawbiome)
+        }
     }
 
     override fun getMaxPlayers(): Int {
@@ -280,5 +281,13 @@ class FabricDynmapServer(private val server: MinecraftServer) : DynmapServerInte
 
     override fun getServerIP(): String? {
         return server.serverIp
+    }
+
+    override fun getModList(): MutableList<String> {
+        return FabricLoader.getInstance().allMods.map { it.metadata.name }.toMutableList()
+    }
+
+    override fun isModLoaded(name: String?): Boolean {
+        return FabricLoader.getInstance().isModLoaded(name)
     }
 }

@@ -63,7 +63,7 @@ class EssentialsDynmapModule : EssentialsModule {
         core.server = FabricDynmapServer(server)
 
         core.pluginJarFile = File(this::class.java.protectionDomain.codeSource.location.toURI())
-        core.dataFolder = File(server.runDirectory.canonicalPath + "/dynmap")  // NPE here, lazy load from FabricLoader
+        core.dataFolder = File(FabricLoader.getInstance().configDirectory.canonicalPath + "/dynmap")
         core.dataFolder.mkdirs()
         core.setMinecraftVersion(server.version)
 
