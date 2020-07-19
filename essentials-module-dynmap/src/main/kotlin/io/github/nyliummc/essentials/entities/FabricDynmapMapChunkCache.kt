@@ -215,7 +215,7 @@ class FabricDynmapMapChunkCache(private val fworld: FabricDynmapWorld,
         }
 
         override fun getBlockType(): DynmapBlockState? {
-            return FabricDynmapBlockStateMapper.INSTANCE[world.getBlockState(pos)]
+            return FabricDynmapBlockStateMapper.INSTANCE[world.getBlockState(pos)] ?: error("Unknown block")
         }
 
         override fun getBlockTileEntityField(fieldId: String): Any? {
@@ -225,7 +225,7 @@ class FabricDynmapMapChunkCache(private val fworld: FabricDynmapWorld,
 
         override fun getBlockTypeAt(xoff: Int, yoff: Int, zoff: Int): DynmapBlockState? {
             val poso = pos!!.add(xoff, yoff, zoff)
-            return FabricDynmapBlockStateMapper.INSTANCE[world.getBlockState(poso)]
+            return FabricDynmapBlockStateMapper.INSTANCE[world.getBlockState(poso)] ?: error("Unknown block")
         }
 
         override fun getBlockTileEntityFieldAt(fieldId: String, xoff: Int, yoff: Int, zoff: Int): Any? {

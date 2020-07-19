@@ -59,8 +59,9 @@ import java.util.regex.Pattern
 class FabricDynmapServer(private val server: MinecraftServer) : DynmapServerInterface() {
     private val patternControlCode: Pattern = Pattern.compile("(?i)[\\u00A7&][0-9A-FK-OR]")
     private val tickTaskMap: ConcurrentHashMap<Long, MutableList<Runnable>> = ConcurrentHashMap()
-    private val fabricWorldMap: WeakHashMap<World, FabricDynmapWorld> = WeakHashMap<World, FabricDynmapWorld>()
-    private val fabricPlayerMap: WeakHashMap<ServerPlayerEntity, FabricDynmapOnlinePlayer> = WeakHashMap<ServerPlayerEntity, FabricDynmapOnlinePlayer>()
+    private val fabricWorldMap: WeakHashMap<World, FabricDynmapWorld> = WeakHashMap()
+    private val fabricStringWorldMap: WeakHashMap<String, FabricDynmapWorld> = WeakHashMap()
+    private val fabricPlayerMap: WeakHashMap<ServerPlayerEntity, FabricDynmapOnlinePlayer> = WeakHashMap()
     private val registered = mutableSetOf<DynmapListenerManager.EventType>()
 
     private val utilitiesAvailable by lazy {
@@ -68,7 +69,11 @@ class FabricDynmapServer(private val server: MinecraftServer) : DynmapServerInte
     }
 
     fun getWorld(world: ServerWorld): FabricDynmapWorld {
-        return fabricWorldMap.computeIfAbsent(world) { FabricDynmapWorld(world) }
+        return fabricWorldMap.computeIfAbsent(world) {
+            FabricDynmapWorld(world).also {
+                fabricStringWorldMap[it.name] = it
+            }
+        }
     }
 
     fun getUser(p: ServerPlayerEntity): FabricDynmapOnlinePlayer {
@@ -251,14 +256,12 @@ class FabricDynmapServer(private val server: MinecraftServer) : DynmapServerInte
         return server.currentPlayerCount
     }
 
-    override fun getBlockIDAt(wname: String?, x: Int, y: Int, z: Int): Int {
-        val dtype = RegistryKey.of(Registry.DIMENSION, Identifier(wname))
-        return Registry.BLOCK.getRawId(server.getWorld(dtype)!!.getBlockState(BlockPos(x, y, z)).block)
+    override fun getBlockIDAt(wname: String, x: Int, y: Int, z: Int): Int {
+        return Registry.BLOCK.getRawId(fabricStringWorldMap[wname]!!.world.getBlockState(BlockPos(x, y, z)).block)
     }
 
     override fun isSignAt(wname: String?, x: Int, y: Int, z: Int): Int {
-        val dtype = RegistryKey.of(Registry.DIMENSION, Identifier(wname))
-        return if (server.getWorld(dtype)!!.getBlockState(BlockPos(x, y, z)).block is SignBlock) 1 else 0
+        return if (fabricStringWorldMap[wname]!!.world.getBlockState(BlockPos(x, y, z)).block is SignBlock) 1 else 0
     }
 
     override fun getServerTPS(): Double {
