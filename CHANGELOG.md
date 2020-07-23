@@ -1,8 +1,42 @@
+## Essentials 0.2.6
+
+Bugs fixed:
+
+- None
+
+New Features:
+
+- None
+
+Improvements:
+
+- None
+
+
+---
+## Essentials 0.2.5
+
+Bugs fixed:
+
+- (base) Fixed Database thread not running.
+- (module-claims) Fixed database constraint for SQLite
+
+New Features:
+
+- None
+
+Improvements:
+
+- None
+
+
+---
 ## Essentials 0.2.4
 
 Bugs fixed:
 
 - (all) Fix accesswidener not being remapped
+- (module-chat) Fix nicknames being reset on join or respawn
 - (module-utilities) Fix chat spam when sleeping
 
 New Features:
@@ -10,12 +44,14 @@ New Features:
 - (api) Add PlayerDeathCallback
 - (api) Add PlayerPreDeathCallback
 - (module-teleport) Add death support to /back
+- (module-simpleclaims) Add simple chunk claiming
 
 Improvements:
 
 - None
 
 
+---
 ## Essentials 0.2.3
 
 Bugs fixed:

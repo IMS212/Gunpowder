@@ -24,11 +24,18 @@
 
 package io.github.nyliummc.essentials.api
 
+/**
+ * Interface a registered module should implement.
+ */
 interface EssentialsModule {
     val name: String
     val toggleable: Boolean
     fun registerCommands() {}
     fun registerEvents() {}
     fun registerConfigs() {}
+
+    /**
+     * Register Database-related stuff here for now
+     */
     fun onInitialize() {}
 }
