@@ -3,7 +3,7 @@
   "id": "gunpowder-base",
   "version": "${version}",
   "name": "Gunpowder",
-  "description": "The base implementation of Gunpowder",
+  "description": "The base implementation of Gunpowder - Unofficial Quilt Version",
   "license": "MIT",
   "icon": "assets/gunpowder/icon.png",
   "environment": "*",
